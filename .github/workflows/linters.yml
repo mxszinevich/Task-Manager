@@ -12,6 +12,6 @@ jobs:
       - name: Black
         run: black app --check
       - name: Isort
-        run: isort app --heck
+        run: isort app --check
       - name: flake8
         run: flake8 app

@@ -1,9 +1,10 @@
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
+
 from common.token import create_access_token, verify_password
 from db.models import User
 from db.repositories.users import UsersRepository
-from fastapi import APIRouter, Depends, HTTPException
 from shemas import TokenOutData, UserCreateToken
-from starlette import status
 
 router = APIRouter()
 

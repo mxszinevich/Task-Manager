@@ -1,7 +1,8 @@
+from fastapi import APIRouter, Depends
+
 from api.dependencies import get_user
 from db.models import User
 from db.repositories.users import UsersRepository
-from fastapi import APIRouter, Depends
 from shemas import UserInfoOut, UserRegistration, UserRegistrationOut
 
 router = APIRouter()

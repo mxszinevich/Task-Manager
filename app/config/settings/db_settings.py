@@ -1,7 +1,8 @@
 from typing import Any
 
-from config.settings import BaseSettings
 from pydantic import PostgresDsn, validator
+
+from config.settings import BaseSettings
 
 
 class PostgresSettings(BaseSettings):

@@ -1,10 +1,11 @@
+from fastapi import Depends, HTTPException
+from jose import JWTError, jwt
+
 from api.dependencies.token import TokenInputData
 from common import UnauthorizedException
 from config import settings
 from db.models import User
 from db.repositories.users import UsersRepository
-from fastapi import Depends, HTTPException
-from jose import JWTError, jwt
 
 
 async def get_user(

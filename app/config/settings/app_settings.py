@@ -1,7 +1,8 @@
 from typing import Any
 
-from config.settings import BaseSettings
 from pydantic import validator
+
+from config.settings import BaseSettings
 
 
 class AppSettings(BaseSettings):

@@ -1,8 +1,9 @@
+from pydantic import BaseModel
+
 from common import BadRequestException, NotFoundException
 from common.token import get_password_hash
 from db.models import User
 from db.repositories.base import BaseRepository
-from pydantic import BaseModel
 
 
 class UsersRepository(BaseRepository):
