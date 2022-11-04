@@ -10,8 +10,8 @@ jobs:
       - name: install linters 😌
         run: pip install black isort Flake8-pyproject
       - name: Black
-        run: black app --check
+        run: cd app && black . --check
       - name: Isort
-        run: isort app --check
+        run: cd app && isort --check
       - name: flake8
-        run: flake8 app
+        run: cd app && flake8
