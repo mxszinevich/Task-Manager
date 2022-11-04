@@ -12,6 +12,6 @@ jobs:
       - name: Black
         run: cd app && black . --check
       - name: Isort
-        run: cd app && isort --check
+        run: cd app && isort . --check
       - name: flake8
         run: cd app && flake8
