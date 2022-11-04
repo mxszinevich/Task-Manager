@@ -1,0 +1,17 @@
+name: linters
+on: [ push ]
+
+jobs:
+  linters:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 🏁
+        uses: actions/checkout@v3
+      - name: install linters 😌
+        run: pip install black isort Flake8-pyproject
+      - name: Black
+        run: black app --check
+      - name: Isort
+        run: isort app --heck
+      - name: flake8
+        run: flake8 app
