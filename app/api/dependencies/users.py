@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
 
 from api.dependencies.token import TokenInputData
-from common import UnauthorizedException
+from common import ForbiddenException, UnauthorizedException
 from config import settings
 from db.models import User
 from db.repositories.users import UsersRepository
@@ -26,4 +26,16 @@ async def get_user(
     except HTTPException:
         raise UnauthorizedException
 
+    return user
+
+
+async def get_active_user(user: User = Depends(get_user)) -> User:
+    if not user.is_active:
+        raise ForbiddenException(detail="Аккаунт заблокирован")
+    return user
+
+
+async def get_superuser(user: User = Depends(get_active_user)) -> User:
+    if not user.is_superuser:
+        raise ForbiddenException(detail="Нет доступа")
     return user

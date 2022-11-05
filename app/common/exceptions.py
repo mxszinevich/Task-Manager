@@ -20,6 +20,10 @@ class UnauthorizedException(BaseApiException):
         super().__init__(headers={"WWW-Authenticate": "Bearer"}, **kwargs)
 
 
+class ForbiddenException(BaseApiException):
+    status_code = status.HTTP_403_FORBIDDEN
+
+
 class NotFoundException(BaseApiException):
     status_code = status.HTTP_404_NOT_FOUND
 

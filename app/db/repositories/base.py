@@ -6,13 +6,11 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.elements import BinaryExpression
+from sqlalchemy.sql.functions import count
 
-from api.dependencies import get_db_session
-from common import object_not_exist
-from shemas import OrmBaseModel
+from api.dependencies.db import get_db_session
 
 MODEL = TypeVar("Table")
-OUT_SCHEMA = TypeVar("OutShema", bound=OrmBaseModel)
 
 
 class BaseRepository(Generic[MODEL], abc.ABC):
@@ -33,15 +31,16 @@ class BaseRepository(Generic[MODEL], abc.ABC):
 
     async def filters(self, **params) -> list[MODEL]:
         fs: list = self.build_filters(params)
-        print(type(fs[0]))
-
         res = await self.session.execute(self.model).filter(*fs)
         return res.all()
 
-    @object_not_exist
     async def get_object(self, **params) -> MODEL | None:
         fs: list[BinaryExpression] = self.build_filters(params)
         result = await self.session.scalars(select(self.model).filter(*fs))
+        return result.first()
+
+    async def count(self) -> int:
+        result = await self.session.scalars(count(self.model.id))
         return result.first()
 
     def build_filters(self, filter_params: dict[str, Any]) -> list[BinaryExpression]:
