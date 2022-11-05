@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from jose import JWTError, jwt
 
 from api.dependencies.token import TokenInputData
@@ -21,9 +21,9 @@ async def get_user(
             raise UnauthorizedException
     except (JWTError, ValueError):
         raise UnauthorizedException
-    try:
-        user: User = await users_rep.get_object(id=user_id)
-    except HTTPException:
+
+    user: User = await users_rep.get_object(id=user_id)
+    if user is None:
         raise UnauthorizedException
 
     return user

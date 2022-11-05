@@ -22,6 +22,7 @@ class UnauthorizedException(BaseApiException):
 
 class ForbiddenException(BaseApiException):
     status_code = status.HTTP_403_FORBIDDEN
+    detail = "Доступ запрещен"
 
 
 class NotFoundException(BaseApiException):

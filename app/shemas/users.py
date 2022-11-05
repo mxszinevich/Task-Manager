@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import Body
-from pydantic import EmailStr
+from pydantic import EmailStr, validator
 
 from shemas import OrmBaseModel
 
@@ -22,7 +22,11 @@ class UserRegistrationOut(BaseUserModel):
 class UserInfoOut(BaseUserModel):
     id: int
     is_active: bool
-    created: datetime
+    created: str
+
+    @validator("created", pre=True)
+    def created_format(cls, value: datetime) -> str:
+        return value.strftime("%Y-%m-%d %H:%M")
 
 
 class UserCreateToken(OrmBaseModel):
