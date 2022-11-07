@@ -1,9 +1,29 @@
+from faker import Faker
+from pydantic import BaseModel, Field
 import pytest
 
 from common.token import create_access_token
 from db.models import User
 from db.repositories.users import UsersRepository
 from shemas import TokenOutData, UserRegistration
+
+faker = Faker()
+
+
+class UserFactory(BaseModel):
+    name: str = Field(default_factory=faker.name)
+    email: str = Field(default_factory=faker.email)
+    password: str = Field(default_factory=faker.password)
+    is_active: bool = Field(default=True)
+    is_superuser: bool = Field(default=False)
+
+
+@pytest.fixture()
+def user_factory():
+    def build_user(**kwargs):
+        return UserFactory(**kwargs)
+
+    return build_user
 
 
 @pytest.fixture()
@@ -17,11 +37,11 @@ def user_registration_data(faker) -> dict:
 
 
 @pytest.fixture
-async def user_active_in_db(user_registration_data, override_get_db_session) -> User:
+async def user_active_in_db(user_registration_data, override_get_db_session, user_factory) -> User:
     user_registration_data = user_registration_data()
     async for session in override_get_db_session():
         users_repo = UsersRepository(session=session)
-        await users_repo.create(UserRegistration(**user_registration_data))
+        await users_repo.create(user_factory(**user_registration_data))
         await session.commit()
         user = await users_repo.get_object(email=user_registration_data["email"])
         return user

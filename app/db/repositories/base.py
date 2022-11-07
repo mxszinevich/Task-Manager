@@ -3,7 +3,7 @@ from typing import Any, Generic, Type, TypeVar
 
 from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.elements import BinaryExpression
@@ -27,11 +27,23 @@ class BaseRepository(Generic[MODEL], abc.ABC):
     def model(self) -> Type[MODEL]:
         ...
 
-    async def create(self, object: BaseModel):
-        self.session.add(self.model(**object.dict()))
+    async def create(
+        self,
+        object: BaseModel,
+    ) -> MODEL:
+        created_obj: MODEL = self.model(**object.dict())
+        self.session.add(created_obj)
+        await self.session.flush()
+        return created_obj
 
-    async def delete(self, obj_id: int):
-        await self.session.execute(delete(self.model).filter(self.model.id == obj_id))
+    async def update(self, filter_params: dict[str, Any], update_values: dict[str, Any]):
+        fs: list = self.build_filters(filter_params)
+        query = update(self.model).where(*fs).values(**update_values)
+        await self.session.execute(query)
+
+    async def delete(self, **params):
+        fs: list[BinaryExpression] = self.build_filters(params)
+        await self.session.execute(delete(self.model).filter(*fs))
 
     async def filters(self, limit: int | None = None, offset: int | None = None, **params) -> list[MODEL]:
         fs: list = self.build_filters(params)

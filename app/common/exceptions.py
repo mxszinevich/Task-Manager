@@ -28,6 +28,15 @@ class ForbiddenException(BaseApiException):
 class NotFoundException(BaseApiException):
     status_code = status.HTTP_404_NOT_FOUND
 
+    def __init__(self, **kwargs) -> None:
+        detail_msg = ",".join(f"{param_name}={param_value}" for param_name, param_value in kwargs.items())
+        if detail_msg:
+            detail_msg = " с " + detail_msg + " "
+        else:
+            detail_msg = " "
+        self.detail = f"Объект{detail_msg}не существует"
+        super().__init__()
+
 
 class BadRequestException(BaseApiException):
     status_code = status.HTTP_400_BAD_REQUEST
