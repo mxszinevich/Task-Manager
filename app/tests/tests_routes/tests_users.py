@@ -5,7 +5,6 @@ from httpx import AsyncClient
 import pytest
 from starlette import status
 
-from db.models import User
 from db.repositories.users import UsersRepository
 from shemas import TokenOutData, UserInfoOut
 
@@ -41,12 +40,15 @@ async def test_users_registration(test_client: AsyncClient, override_get_db_sess
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-async def test_users_me_active_user(test_client: AsyncClient, access_token, user_active_in_db: User):
-    token_data: TokenOutData = access_token(user_id=user_active_in_db.id)
+async def test_users_me_active_user(test_client: AsyncClient, access_token, user_factory, override_get_db_session):
+    user = await user_factory()
+    token_data: TokenOutData = access_token(user_id=user.id)
     res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     assert res.status_code == status.HTTP_200_OK
-    assert res.json() == json.loads(UserInfoOut.from_orm(user_active_in_db).json())
 
+    assert res.json() == json.loads(UserInfoOut.from_orm(user).json())
+
+    res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     res = await test_client.get("users/me")
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -56,11 +58,12 @@ async def test_users_me_active_user(test_client: AsyncClient, access_token, user
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-async def test_users_me_inactive_user(test_client: AsyncClient, access_token, user_inactive_in_db: User):
-    token_data = access_token(user_id=user_inactive_in_db.id)
+async def test_users_me_inactive_user(test_client: AsyncClient, access_token, user_factory):
+    user = await user_factory(is_active=False)
+    token_data = access_token(user_id=user.id)
     res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     assert res.status_code == status.HTTP_200_OK
-    assert res.json() == json.loads(UserInfoOut.from_orm(user_inactive_in_db).json())
+    assert res.json() == json.loads(UserInfoOut.from_orm(user).json())
 
 
 async def test_users_me_none_user(test_client: AsyncClient, access_token):
@@ -69,22 +72,22 @@ async def test_users_me_none_user(test_client: AsyncClient, access_token):
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-async def test_user_delete(
-    test_client: AsyncClient, access_token, user_active_in_db, user_inactive_in_db, override_get_db_session
-):
-    token_data = access_token(user_id=user_active_in_db.id)
+async def test_user_delete(test_client: AsyncClient, access_token, user_factory, override_get_db_session):
+    user_active = await user_factory()
+    user_inactive = await user_factory(is_active=False)
+    token_data = access_token(user_id=user_active.id)
 
     res = await test_client.delete(
-        f"users/{user_inactive_in_db.id}", headers={"Authorization": f"{token_data.type} {token_data.access_token}"}
+        f"users/{user_inactive.id}", headers={"Authorization": f"{token_data.type} {token_data.access_token}"}
     )
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
     res = await test_client.delete(
-        f"users/{user_active_in_db.id}", headers={"Authorization": f"{token_data.type} {token_data.access_token}"}
+        f"users/{user_active.id}", headers={"Authorization": f"{token_data.type} {token_data.access_token}"}
     )
     assert res.status_code == status.HTTP_204_NO_CONTENT
 
     async for session in override_get_db_session():
         users_repo = UsersRepository(session=session)
-        user = await users_repo.get_object(email=user_active_in_db.email)
+        user = await users_repo.get_object(email=user_active.email)
         assert user is None

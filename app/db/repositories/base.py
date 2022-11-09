@@ -27,10 +27,7 @@ class BaseRepository(Generic[MODEL], abc.ABC):
     def model(self) -> Type[MODEL]:
         ...
 
-    async def create(
-        self,
-        object: BaseModel,
-    ) -> MODEL:
+    async def create(self, object: BaseModel) -> MODEL:
         created_obj: MODEL = self.model(**object.dict())
         self.session.add(created_obj)
         await self.session.flush()

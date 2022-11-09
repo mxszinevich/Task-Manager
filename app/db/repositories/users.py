@@ -11,9 +11,9 @@ class UsersRepository(BaseRepository):
     def model(self) -> User:
         return User
 
-    async def create(self, user: BaseModel):
+    async def create(self, user: BaseModel) -> User:
         user = user.copy(update={"password": get_password_hash(user.password)})
         user_check = await self.get_object(email=user.email)
         if user_check is not None:
             raise BadRequestException(detail="Пользователь с таким email уже существует")
-        await super().create(user)
+        return await super().create(user)

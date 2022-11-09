@@ -64,13 +64,11 @@ def test_session(test_postgres_dsn) -> AsyncSession:
 
 
 @pytest.fixture()
-async def override_get_db_session(test_session):
+async def override_get_db_session(test_session) -> AsyncGenerator:
     async def get_db():
         async with test_session() as session:
-            try:
-                yield session
-            finally:
-                await session.commit()
+            yield session
+            await session.commit()
 
     return get_db
 

@@ -21,7 +21,6 @@ async def get_user(
             raise UnauthorizedException
     except (JWTError, ValueError):
         raise UnauthorizedException
-
     user: User = await users_rep.get_object(id=user_id)
     if user is None:
         raise UnauthorizedException

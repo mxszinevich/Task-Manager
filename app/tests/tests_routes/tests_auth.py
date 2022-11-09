@@ -1,17 +1,14 @@
 import pytest
 from starlette import status
 
-from db.models import User
-
 pytestmark = pytest.mark.asyncio
 
 
-async def test_get_access_token(test_client, user_registration_data: dict, user_active_in_db: User):
-    user_registration_data = user_registration_data()
-
+async def test_get_access_token(test_client, user_factory):
+    user = await user_factory(password="password")
     data = {
-        "email": user_registration_data["email"],
-        "password": user_registration_data["password"],
+        "email": user.email,
+        "password": "password",
     }
     res = await test_client.post("auth/", json=data)
     assert res.status_code == status.HTTP_200_OK
@@ -20,10 +17,10 @@ async def test_get_access_token(test_client, user_registration_data: dict, user_
     assert res_json["type"] == "Bearer"
 
 
-async def test_get_access_token_with_invalid_data(test_client, user_registration_data, user_active_in_db: User):
-    user_registration_data = user_registration_data()
+async def test_get_access_token_with_invalid_data(test_client, user_factory):
+    user = await user_factory(is_active=True, password="password")
     data = {
-        "email": user_registration_data["email"],
+        "email": user.email,
         "password": "invalid_password",
     }
     res = await test_client.post("auth/", json=data)
@@ -32,7 +29,7 @@ async def test_get_access_token_with_invalid_data(test_client, user_registration
 
     data = {
         "email": "test@test.com",
-        "password": user_registration_data["password"],
+        "password": "password",
     }
     res = await test_client.post("auth/", json=data)
     assert res.status_code == status.HTTP_401_UNAUTHORIZED
