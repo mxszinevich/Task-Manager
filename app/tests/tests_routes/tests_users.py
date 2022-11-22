@@ -1,4 +1,3 @@
-import json
 import random
 
 from httpx import AsyncClient
@@ -6,7 +5,7 @@ import pytest
 from starlette import status
 
 from db.repositories.users import UsersRepository
-from shemas import TokenOutData, UserInfoOut
+from shemas import TokenOutData
 
 pytestmark = pytest.mark.asyncio
 
@@ -45,10 +44,14 @@ async def test_users_me_active_user(test_client: AsyncClient, access_token, user
     token_data: TokenOutData = access_token(user_id=user.id)
     res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     assert res.status_code == status.HTTP_200_OK
+    assert res.json() == {
+        "name": user.name,
+        "email": user.email,
+        "id": user.id,
+        "task_count": 0,
+        "created": user.created.strftime("%Y-%m-%d %H:%M"),
+    }
 
-    assert res.json() == json.loads(UserInfoOut.from_orm(user).json())
-
-    res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     res = await test_client.get("users/me")
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -63,7 +66,13 @@ async def test_users_me_inactive_user(test_client: AsyncClient, access_token, us
     token_data = access_token(user_id=user.id)
     res = await test_client.get("users/me", headers={"Authorization": f"{token_data.type} {token_data.access_token}"})
     assert res.status_code == status.HTTP_200_OK
-    assert res.json() == json.loads(UserInfoOut.from_orm(user).json())
+    assert res.json() == {
+        "name": user.name,
+        "email": user.email,
+        "id": user.id,
+        "task_count": 0,
+        "created": user.created.strftime("%Y-%m-%d %H:%M"),
+    }
 
 
 async def test_users_me_none_user(test_client: AsyncClient, access_token):

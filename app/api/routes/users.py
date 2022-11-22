@@ -20,7 +20,9 @@ async def user_registration(user: UserRegistration, users_repo: UsersRepository 
 
 
 @router.get("/me", summary="Информация о пользователе", response_model=UserInfoOut)
-async def user_me(user: User = Depends(get_user)):
+async def user_me(user: User = Depends(get_user), users_repo: UsersRepository = Depends()):
+    user, task_count = await users_repo.user_info(user.id)
+    user.task_count = task_count
     return user
 
 
@@ -36,7 +38,4 @@ async def user_delete(user_id: int, user: User = Depends(get_user), users_repo: 
 async def users_list(
     filters: UsersListFilter = Depends(), user: User = Depends(get_superuser), users_repo: UsersRepository = Depends()
 ):
-    if not user.is_superuser:
-        raise ForbiddenException
-    users = await users_repo.filters(**filters.dict(exclude_none=True))
-    return users
+    return await users_repo.filters(**filters.dict(exclude_none=True))

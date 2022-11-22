@@ -40,6 +40,16 @@ def user_factory(override_get_db_session) -> Callable:
 
 
 @pytest.fixture
+async def user_active(user_factory) -> User:
+    return await user_factory()
+
+
+@pytest.fixture
+async def user_inactive(user_factory) -> User:
+    return await user_factory(is_active=False)
+
+
+@pytest.fixture
 async def access_token() -> TokenOutData:
     def build_token(user_id: int):
         access_token = create_access_token(user_id=user_id)

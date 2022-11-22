@@ -21,7 +21,7 @@ class UserRegistrationOut(BaseUserModel):
 
 class UserInfoOut(BaseUserModel):
     id: int
-    is_active: bool
+    task_count: int
     created: str
 
     @validator("created", pre=True)

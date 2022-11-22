@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, func
 
 from db.models import Base
 
@@ -9,4 +9,5 @@ class Task(Base):
     name = Column(String(300), nullable=False)
     body = Column(String)
     created = Column(DateTime, server_default=func.now())
+    active = Column(Boolean, default=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

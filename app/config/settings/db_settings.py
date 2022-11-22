@@ -13,7 +13,7 @@ class PostgresSettings(BaseSettings):
     password: str = "postgres"
     db: str = "postgres"
     dsn: str | None
-    echo_mode: bool = True
+    echo: bool = True
 
     @validator("dsn", pre=True)
     def dsn_build(cls, value: str | None, values: dict[str, Any]) -> str:

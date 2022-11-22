@@ -19,3 +19,6 @@ class AppSettings(BaseSettings):
         if value is None:
             value = values["name"]
         return value
+
+    class Config:
+        env_prefix = "app_"

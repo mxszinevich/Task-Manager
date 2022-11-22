@@ -14,4 +14,4 @@ class AsyncSessionBuilder:
         return self.session
 
 
-async_session_builder = AsyncSessionBuilder(database_url=settings.db.dsn, echo=settings.db.echo_mode)
+async_session_builder = AsyncSessionBuilder(database_url=settings.db.dsn, echo=settings.db.echo)
