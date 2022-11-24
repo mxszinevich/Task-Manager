@@ -23,6 +23,7 @@ class TaskDetail(BaseTask):
     id: int
     user_id: int
     created: str
+    active: bool
 
     @validator("created", pre=True)
     def created_formatting(cls, value: datetime) -> str:
@@ -32,3 +33,4 @@ class TaskDetail(BaseTask):
 class TaskUpdate(OrmBaseModel):
     name: str | None
     body: str | None
+    active: bool | None

@@ -1,6 +1,5 @@
 from typing import Callable
 
-from faker import Faker
 from pydantic import BaseModel, Field
 import pytest
 
@@ -8,8 +7,7 @@ from common.token import create_access_token
 from db.models import User
 from db.repositories.users import UsersRepository
 from shemas import TokenOutData
-
-faker = Faker(locale="ru_RU")
+from tests.conftest import faker
 
 
 class UserFactory(BaseModel):
@@ -41,6 +39,16 @@ def user_factory(override_get_db_session) -> Callable:
 
 @pytest.fixture
 async def user_active(user_factory) -> User:
+    return await user_factory()
+
+
+@pytest.fixture
+async def super_user(user_factory) -> User:
+    return await user_factory(is_superuser=True)
+
+
+@pytest.fixture
+async def another_user_active(user_factory) -> User:
     return await user_factory()
 
 

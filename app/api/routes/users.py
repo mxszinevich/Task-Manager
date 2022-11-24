@@ -3,7 +3,7 @@ from starlette import status
 
 from api.dependencies.users import get_superuser, get_user
 from api.filters import UsersListFilter
-from common import ForbiddenException
+from common import BadRequestException, ForbiddenException
 from db.models import User
 from db.repositories.users import UsersRepository
 from shemas import UserInfoOut, UserRegistration, UserRegistrationOut
@@ -15,6 +15,10 @@ router = APIRouter()
     "/", summary="Регистрация пользователя", response_model=UserRegistrationOut, status_code=status.HTTP_201_CREATED
 )
 async def user_registration(user: UserRegistration, users_repo: UsersRepository = Depends()):
+    user_check = await users_repo.get_object(email=user.email)
+    if user_check is not None:
+        raise BadRequestException(detail="Пользователь с таким email уже существует")
+
     await users_repo.create(user)
     return user
 

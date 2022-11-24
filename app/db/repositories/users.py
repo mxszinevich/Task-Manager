@@ -3,7 +3,6 @@ from sqlalchemy import and_
 from sqlalchemy.future import select
 from sqlalchemy.sql.functions import count
 
-from common import BadRequestException
 from common.token import get_password_hash
 from db.models import Task, User
 from db.repositories.base import BaseRepository
@@ -16,9 +15,6 @@ class UsersRepository(BaseRepository):
 
     async def create(self, user: BaseModel) -> User:
         user = user.copy(update={"password": get_password_hash(user.password)})
-        user_check = await self.get_object(email=user.email)
-        if user_check is not None:
-            raise BadRequestException(detail="Пользователь с таким email уже существует")
         return await super().create(user)
 
     async def user_info(self, user_id: int):

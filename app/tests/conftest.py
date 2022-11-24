@@ -2,6 +2,7 @@ from typing import AsyncGenerator, Callable
 
 import alembic
 from alembic.config import Config
+from faker import Faker
 from fastapi import FastAPI
 from httpx import AsyncClient
 from pydantic import PostgresDsn
@@ -10,10 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_utils import create_database, drop_database
 
 from api.dependencies.db import get_db_session
+from api.dependencies.users import get_active_user
 from config import settings
 from db.session import AsyncSessionBuilder
 
-pytest_plugins = ("tests.fixtures.users",)
+pytest_plugins = ("tests.fixtures.users", "tests.fixtures.tasks")
+
+faker = Faker(locale="ru_RU")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -59,7 +63,7 @@ def apply_migrations(create_db, test_postgres_dsn):
 @pytest.fixture()
 def test_session(test_postgres_dsn) -> AsyncSession:
     test_db_dsn = test_postgres_dsn(scheme=settings.db.scheme)
-    async_session_builder = AsyncSessionBuilder(database_url=test_db_dsn, echo=True)
+    async_session_builder = AsyncSessionBuilder(database_url=test_db_dsn, echo=settings.db.echo)
     yield async_session_builder()
 
 
@@ -85,3 +89,16 @@ def app(override_get_db_session) -> FastAPI:
 async def test_client(app: FastAPI) -> AsyncGenerator:
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
+
+
+@pytest.fixture()
+async def test_cred_client(app: FastAPI, user_active, monkeypatch) -> AsyncGenerator:
+    async def get_user():
+        return user_active
+
+    app.dependency_overrides[get_active_user] = get_user
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        try:
+            yield client
+        finally:
+            app.dependency_overrides.pop(get_active_user)
