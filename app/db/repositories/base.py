@@ -10,8 +10,9 @@ from sqlalchemy.sql.elements import BinaryExpression
 from sqlalchemy.sql.functions import count
 
 from api.dependencies.db import get_db_session
+from db.models import Base
 
-MODEL = TypeVar("Table")
+MODEL = TypeVar("Table", bound=Base)
 
 
 class BaseRepository(Generic[MODEL], abc.ABC):
@@ -27,8 +28,8 @@ class BaseRepository(Generic[MODEL], abc.ABC):
     def model(self) -> Type[MODEL]:
         ...
 
-    async def create(self, object: BaseModel) -> MODEL:
-        created_obj: MODEL = self.model(**object.dict())
+    async def create(self, object_: BaseModel) -> MODEL:
+        created_obj: MODEL = self.model(**object_.dict())
         self.session.add(created_obj)
         await self.session.flush()
         return created_obj

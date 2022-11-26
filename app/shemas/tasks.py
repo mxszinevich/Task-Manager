@@ -1,7 +1,7 @@
 from pydantic import validator
 
 from db.constants import StatusType
-from shemas import OrmBaseModel
+from shemas import CategoryDetail, OrmBaseModel
 from shemas.validators.datetime_format import datetime_formatting
 
 
@@ -26,6 +26,7 @@ class TaskDetail(BaseTask):
     status: StatusType
     completion_date: str | None
     created: str
+    categories: list[CategoryDetail]
 
     _valid_date = validator("created", "completion_date", check_fields=False, allow_reuse=True, pre=True)(
         datetime_formatting

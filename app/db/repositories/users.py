@@ -1,3 +1,5 @@
+from typing import Type
+
 from pydantic import BaseModel
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -9,7 +11,7 @@ from db.repositories.base import BaseRepository
 
 class UsersRepository(BaseRepository):
     @property
-    def model(self) -> User:
+    def model(self) -> Type[User]:
         return User
 
     async def create(self, user: BaseModel) -> User:

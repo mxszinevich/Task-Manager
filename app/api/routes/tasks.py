@@ -33,7 +33,7 @@ async def get_tasks_filters(user: User = Depends(get_active_user), task_repo: Ta
 
 @router.get("/{task_id}", summary="Детализация задачи", response_model=TaskDetail)
 async def task_detail(task_id: int, user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()):
-    task: Task = await task_repo.get_object(id=task_id, user_id=user.id)
+    task: Task = await task_repo.get_task_full_data(id=task_id, user_id=user.id)
     if task is None:
         raise NotFoundException(id=task_id)
     return task
