@@ -4,6 +4,7 @@ from httpx import AsyncClient
 import pytest
 from starlette import status
 
+from db.constants import StatusType
 from db.repositories.tasks import TasksRepository
 from shemas import TokenOutData
 
@@ -24,6 +25,7 @@ async def test_task_create(test_client: AsyncClient, user_active, user_inactive,
         "name": "test_task",
         "body": "test_body",
         "id": 1,
+        "status": StatusType.CREATED,
         "user_id": user_active.id,
     }
     async for session in override_get_db_session():
@@ -50,16 +52,25 @@ async def test_task_list(tasks_generating, test_cred_client):
             "id": task.id,
             "user_id": task.user_id,
             "created": task.created.strftime("%Y-%m-%d %H:%M"),
-            "active": task.active,
+            "status": task.status.value,
+            "completion_date": None,
         }
         for task in tasks
     ]
 
 
-@pytest.mark.parametrize("data_gen,active", [({"n": 2}, True), ({"n": 3, "active": False}, False)])
-async def test_task_list_filters(tasks_generating, test_cred_client, data_gen, active):
+@pytest.mark.parametrize(
+    "data_gen,task_status",
+    [
+        ({"n": 2, "status": StatusType.CREATED}, StatusType.COMPLETED),
+        ({"n": 3, "status": StatusType.COMPLETED}, StatusType.EXPIRED),
+    ],
+)
+async def test_task_list_filters(tasks_generating, test_cred_client, data_gen, task_status):
+    await tasks_generating(n=1, status=task_status)
+
     tasks = await tasks_generating(**data_gen)
-    res = await test_cred_client.get("tasks/", params={"active": active})
+    res = await test_cred_client.get("tasks/", params={"status": data_gen["status"]})
     assert res.status_code == status.HTTP_200_OK
     assert len(res.json()) == data_gen["n"]
     assert res.json() == [
@@ -69,7 +80,8 @@ async def test_task_list_filters(tasks_generating, test_cred_client, data_gen, a
             "id": task.id,
             "user_id": task.user_id,
             "created": task.created.strftime("%Y-%m-%d %H:%M"),
-            "active": task.active,
+            "status": task.status,
+            "completion_date": None,
         }
         for task in tasks
     ]
@@ -84,7 +96,8 @@ async def test_task_detail(task, test_cred_client, faker):
         "id": task.id,
         "user_id": task.user_id,
         "created": task.created.strftime("%Y-%m-%d %H:%M"),
-        "active": task.active,
+        "status": task.status,
+        "completion_date": None,
     }
 
     res = await test_cred_client.get(f"tasks/{faker.pyint(min_value=1000)}")
@@ -154,16 +167,19 @@ async def test_task_update(task, test_cred_client):
         "id": task.id,
         "user_id": task.user_id,
         "created": task.created.strftime("%Y-%m-%d %H:%M"),
-        "active": task.active,
+        "status": StatusType.CREATED,
+        "completion_date": None,
     }
     update_data = {
         "body": "updated_body2",
+        "status": StatusType.COMPLETED.value,
     }
     res = await test_cred_client.patch(f"tasks/{task.id}", json=update_data)
     assert res.status_code == status.HTTP_200_OK
     res_json = res.json()
     assert res_json["name"] == "updated_name"
     assert res_json["body"] == "updated_body2"
+    assert res_json["status"] == StatusType.COMPLETED
 
     res = await test_cred_client.patch(f"tasks/{task.id}")
     assert res.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

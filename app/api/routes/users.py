@@ -15,19 +15,16 @@ router = APIRouter()
     "/", summary="Регистрация пользователя", response_model=UserRegistrationOut, status_code=status.HTTP_201_CREATED
 )
 async def user_registration(user: UserRegistration, users_repo: UsersRepository = Depends()):
-    user_check = await users_repo.get_object(email=user.email)
+    user_check: User | None = await users_repo.get_object(email=user.email)
     if user_check is not None:
         raise BadRequestException(detail="Пользователь с таким email уже существует")
 
-    await users_repo.create(user)
-    return user
+    return await users_repo.create(user)
 
 
 @router.get("/me", summary="Информация о пользователе", response_model=UserInfoOut)
 async def user_me(user: User = Depends(get_user), users_repo: UsersRepository = Depends()):
-    user, task_count = await users_repo.user_info(user.id)
-    user.task_count = task_count
-    return user
+    return await users_repo.user_info(user.id)
 
 
 @router.delete("/{user_id}", summary="Удаление пользователя", status_code=status.HTTP_204_NO_CONTENT)

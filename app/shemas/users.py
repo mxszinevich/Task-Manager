@@ -16,12 +16,14 @@ class UserRegistration(BaseUserModel):
 
 
 class UserRegistrationOut(BaseUserModel):
-    ...
+    id: int
 
 
 class UserInfoOut(BaseUserModel):
     id: int
-    task_count: int
+    count_task_created: int | None
+    count_task_completed: int | None
+    count_task_expired: int | None
     created: str
 
     @validator("created", pre=True)

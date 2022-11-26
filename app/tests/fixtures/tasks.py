@@ -3,6 +3,7 @@ from typing import Callable
 from pydantic import BaseModel, Field
 import pytest
 
+from db.constants import StatusType
 from db.models import Task
 from db.repositories.tasks import TasksRepository
 from tests.conftest import faker
@@ -11,7 +12,7 @@ from tests.conftest import faker
 class TaskFactory(BaseModel):
     name: str = Field(default_factory=faker.word)
     body: str = Field(default_factory=faker.paragraph)
-    active: bool = Field(default=True)
+    status: StatusType = Field(default=StatusType.CREATED)
     user_id: int = Field(...)
 
 

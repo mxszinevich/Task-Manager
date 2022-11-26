@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_utils import create_database, drop_database
 
 from api.dependencies.db import get_db_session
-from api.dependencies.users import get_active_user
+from api.dependencies.users import get_active_user, get_user
 from config import settings
 from db.session import AsyncSessionBuilder
 
@@ -92,11 +92,12 @@ async def test_client(app: FastAPI) -> AsyncGenerator:
 
 
 @pytest.fixture()
-async def test_cred_client(app: FastAPI, user_active, monkeypatch) -> AsyncGenerator:
-    async def get_user():
+async def test_cred_client(app: FastAPI, user_active) -> AsyncGenerator:
+    async def _get_user():
         return user_active
 
-    app.dependency_overrides[get_active_user] = get_user
+    app.dependency_overrides[get_active_user] = _get_user
+    app.dependency_overrides[get_user] = _get_user
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         try:
             yield client

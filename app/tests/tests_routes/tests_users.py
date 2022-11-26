@@ -4,6 +4,7 @@ from httpx import AsyncClient
 import pytest
 from starlette import status
 
+from db.constants import StatusType
 from db.repositories.users import UsersRepository
 from shemas import TokenOutData
 
@@ -11,9 +12,13 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_users_registration(test_client: AsyncClient, override_get_db_session, user_registration_data):
-    user_registration_data = user_registration_data()
+    user_registration_data: dict = user_registration_data()
     res = await test_client.post("users/", json=user_registration_data)
     assert res.status_code == status.HTTP_201_CREATED
+    res_json = res.json()
+    assert res_json["id"]
+    assert res_json["name"] == user_registration_data["name"]
+    assert res_json["email"] == user_registration_data["email"]
 
     async for session in override_get_db_session():
         users_repo = UsersRepository(session=session)
@@ -48,7 +53,9 @@ async def test_users_me_active_user(test_client: AsyncClient, access_token, user
         "name": user.name,
         "email": user.email,
         "id": user.id,
-        "task_count": 0,
+        "count_task_created": 0,
+        "count_task_completed": 0,
+        "count_task_expired": 0,
         "created": user.created.strftime("%Y-%m-%d %H:%M"),
     }
 
@@ -70,9 +77,23 @@ async def test_users_me_inactive_user(test_client: AsyncClient, access_token, us
         "name": user.name,
         "email": user.email,
         "id": user.id,
-        "task_count": 0,
+        "count_task_created": 0,
+        "count_task_completed": 0,
+        "count_task_expired": 0,
         "created": user.created.strftime("%Y-%m-%d %H:%M"),
     }
+
+
+async def test_users_me_with_tasks(test_cred_client: AsyncClient, tasks_generating, user_active):
+    created_tasks = await tasks_generating(2)
+    completed_tasks = await tasks_generating(10, status=StatusType.COMPLETED)
+    expired_tasks = await tasks_generating(4, status=StatusType.EXPIRED)
+    res = await test_cred_client.get("users/me")
+    res_json = res.json()
+    assert res_json["id"] == user_active.id
+    assert res_json["count_task_created"] == len(created_tasks)
+    assert res_json["count_task_completed"] == len(completed_tasks)
+    assert res_json["count_task_expired"] == len(expired_tasks)
 
 
 async def test_users_me_none_user(test_client: AsyncClient, access_token):

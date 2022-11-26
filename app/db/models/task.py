@@ -1,5 +1,7 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy_utils import ChoiceType
 
+from db.constants import StatusType
 from db.models import Base
 
 
@@ -9,5 +11,6 @@ class Task(Base):
     name = Column(String(300), nullable=False)
     body = Column(String)
     created = Column(DateTime, server_default=func.now())
-    active = Column(Boolean, default=True, nullable=False)
+    status = Column(ChoiceType(StatusType, impl=Integer()), default=StatusType.CREATED)
+    completion_date = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)

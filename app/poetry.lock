@@ -78,6 +78,17 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "choicesenum"
+version = "0.7.0"
+description = "Python's Enum with extra powers to play nice with labels and choices fields"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
@@ -589,7 +600,7 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "479cb08a133b3fd38f355e12f6d1604a8a2b2e06e27410b322409aff53a88f10"
+content-hash = "45ef237a749b907df3a25b5cc0efd9977d70c84c29ce40a94100db7a223903fa"
 
 [metadata.files]
 alembic = []
@@ -598,6 +609,7 @@ asyncpg = []
 attrs = []
 bcrypt = []
 certifi = []
+choicesenum = []
 click = [
     {file = "click-8.1.3-py3-none-any.whl", hash = "sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48"},
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},

@@ -16,17 +16,19 @@ router = APIRouter()
 async def task_create(
     task: TaskCreateIn, user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()
 ):
-    task = task.copy(update={"user_id": user.id})
-    created_task = await task_repo.create(task)
-    return created_task
+    return await task_repo.create(task.copy(update={"user_id": user.id}))
 
 
 @router.get("/", summary="Список задач", response_model=list[TaskDetail])
 async def task_list(
     filters: TaskListQuery = Depends(), user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()
 ):
-    tasks = await task_repo.filters(user_id=user.id, **filters.dict(exclude_none=True))
-    return tasks
+    return await task_repo.filters(user_id=user.id, **filters.dict(exclude_none=True))
+
+
+@router.get("/filters", summary="Фильтры задач", status_code=status.HTTP_200_OK)
+async def get_tasks_filters(user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()):
+    return await task_repo.get_filters()
 
 
 @router.get("/{task_id}", summary="Детализация задачи", response_model=TaskDetail)
