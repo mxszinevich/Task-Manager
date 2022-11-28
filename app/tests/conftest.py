@@ -103,3 +103,4 @@ async def test_cred_client(app: FastAPI, user_active) -> AsyncGenerator:
             yield client
         finally:
             app.dependency_overrides.pop(get_active_user)
+            app.dependency_overrides.pop(get_user)

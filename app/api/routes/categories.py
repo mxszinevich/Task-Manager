@@ -9,6 +9,14 @@ from shemas import CategoryCreate, CategoryDetail
 router = APIRouter()
 
 
+@router.get("/", summary="Список категорий", response_model=list[CategoryDetail])
+async def categories_list(
+    cat_repo: CategoriesRepository = Depends(),
+    user: User = Depends(get_active_user),
+):
+    return await cat_repo.filters()
+
+
 @router.post("/", summary="Создание категории", response_model=CategoryDetail)
 async def category_create(
     category: CategoryCreate,

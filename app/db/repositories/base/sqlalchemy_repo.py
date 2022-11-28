@@ -1,9 +1,8 @@
-import abc
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, TypeVar
 
 from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import delete, update
+from sqlalchemy import delete, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.elements import BinaryExpression
@@ -15,18 +14,13 @@ from db.models import Base
 MODEL = TypeVar("Table", bound=Base)
 
 
-class BaseRepository(Generic[MODEL], abc.ABC):
+class SqlAlchemyRepo:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self._session = session
 
     @property
     def session(self) -> AsyncSession:
         return self._session
-
-    @property
-    @abc.abstractmethod
-    def model(self) -> Type[MODEL]:
-        ...
 
     async def create(self, object_: BaseModel) -> MODEL:
         created_obj: MODEL = self.model(**object_.dict())
@@ -56,6 +50,10 @@ class BaseRepository(Generic[MODEL], abc.ABC):
     async def count(self) -> int:
         result = await self.session.scalars(count(self.model.id))
         return result.first()
+
+    async def bulk_insert(self, insert_data: list[dict[str, Any]]) -> int:
+        result = await self.session.execute(insert(self.model).values(insert_data))
+        return result.rowcount
 
     def build_filters(self, filter_params: dict[str, Any]) -> list[BinaryExpression]:
         return [getattr(self.model, filter_name) == filter_value for filter_name, filter_value in filter_params.items()]

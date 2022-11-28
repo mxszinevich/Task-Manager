@@ -12,6 +12,10 @@ class BaseApiException(HTTPException):
         super().__init__(status_code=self.status_code, detail=self.detail, **kwargs)
 
 
+class BadRequestException(BaseApiException):
+    status_code = status.HTTP_400_BAD_REQUEST
+
+
 class UnauthorizedException(BaseApiException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Не удалось подтвердить учетные данные"
@@ -38,5 +42,5 @@ class NotFoundException(BaseApiException):
         super().__init__()
 
 
-class BadRequestException(BaseApiException):
-    status_code = status.HTTP_400_BAD_REQUEST
+class UnprocessableEntityException(BaseApiException):
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY

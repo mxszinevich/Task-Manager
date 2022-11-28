@@ -27,6 +27,8 @@ async def test_task_create(test_client: AsyncClient, user_active, user_inactive,
         "id": 1,
         "status": StatusType.CREATED,
         "user_id": user_active.id,
+        "completion_date": None,
+        "categories": [],
     }
     async for session in override_get_db_session():
         tasks_repo = TasksRepository(session=session)
@@ -98,6 +100,7 @@ async def test_task_detail(task, test_cred_client, faker):
         "created": task.created.strftime("%Y-%m-%d %H:%M"),
         "status": task.status,
         "completion_date": None,
+        "categories": [],
     }
 
     res = await test_cred_client.get(f"tasks/{faker.pyint(min_value=1000)}")
@@ -169,6 +172,7 @@ async def test_task_update(task, test_cred_client):
         "created": task.created.strftime("%Y-%m-%d %H:%M"),
         "status": StatusType.CREATED,
         "completion_date": None,
+        "categories": [],
     }
     update_data = {
         "body": "updated_body2",

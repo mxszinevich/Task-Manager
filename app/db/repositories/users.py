@@ -6,10 +6,10 @@ from sqlalchemy.orm import selectinload
 
 from common.token import get_password_hash
 from db.models import User
-from db.repositories.base import BaseRepository
+from db.repositories.base import BaseRepository, SqlAlchemyRepo
 
 
-class UsersRepository(BaseRepository):
+class UsersRepository(SqlAlchemyRepo, BaseRepository):
     @property
     def model(self) -> Type[User]:
         return User

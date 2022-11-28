@@ -8,7 +8,7 @@ from sqlalchemy.sql.functions import count
 
 from common.aggregate import BaseAggregate
 from db.models import Category, Task, TaskCategory
-from db.repositories.base import BaseRepository
+from db.repositories.base import BaseRepository, SqlAlchemyRepo
 
 
 class StatusAggregate(BaseAggregate):
@@ -34,7 +34,7 @@ class CategoriesAggregate(BaseAggregate):
         return {self.field: [{"value": id_, "label": name, "count": count} for id_, name, count in filters.all()]}
 
 
-class TasksRepository(BaseRepository):
+class TasksRepository(SqlAlchemyRepo, BaseRepository):
     status = StatusAggregate()
     categories = CategoriesAggregate()
 

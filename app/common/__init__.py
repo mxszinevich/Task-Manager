@@ -1,2 +1,8 @@
 from .decorators import object_not_exist
-from .exceptions import BadRequestException, ForbiddenException, NotFoundException, UnauthorizedException
+from .exceptions import (
+    BadRequestException,
+    ForbiddenException,
+    NotFoundException,
+    UnauthorizedException,
+    UnprocessableEntityException,
+)
