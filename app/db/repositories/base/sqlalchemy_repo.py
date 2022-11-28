@@ -2,7 +2,7 @@ from typing import Any, TypeVar
 
 from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import delete, insert, update
+from sqlalchemy import Table, delete, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.elements import BinaryExpression
@@ -11,7 +11,8 @@ from sqlalchemy.sql.functions import count
 from api.dependencies.db import get_db_session
 from db.models import Base
 
-MODEL = TypeVar("Table", bound=Base)
+MODEL = TypeVar("Model", bound=Base)
+TABLE = TypeVar("Table", bound=Table)
 
 
 class SqlAlchemyRepo:
@@ -22,7 +23,7 @@ class SqlAlchemyRepo:
     def session(self) -> AsyncSession:
         return self._session
 
-    async def create(self, object_: BaseModel) -> MODEL:
+    async def create(self, object_: BaseModel) -> MODEL | TABLE:
         created_obj: MODEL = self.model(**object_.dict())
         self.session.add(created_obj)
         await self.session.flush()
@@ -37,7 +38,7 @@ class SqlAlchemyRepo:
         fs: list[BinaryExpression] = self.build_filters(params)
         await self.session.execute(delete(self.model).filter(*fs))
 
-    async def filters(self, limit: int | None = None, offset: int | None = None, **params) -> list[MODEL]:
+    async def filters(self, limit: int | None = None, offset: int | None = None, **params) -> list[MODEL | TABLE]:
         fs: list = self.build_filters(params)
         res = await self.session.scalars(select(self.model).filter(*fs).limit(limit).offset(offset))
         return res.all()
