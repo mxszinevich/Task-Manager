@@ -15,8 +15,10 @@ from db.models import Base
 MODEL = TypeVar("Model", bound=Base)
 TABLE = TypeVar("Table", bound=Table)
 
+DATA_TYPE = TypeVar("DataType", MODEL, TABLE)
 
-class SqlAlchemyRepo(Generic[MODEL, TABLE], abc.ABC):
+
+class SqlAlchemyRepo(Generic[DATA_TYPE], abc.ABC):
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self._session = session
 
