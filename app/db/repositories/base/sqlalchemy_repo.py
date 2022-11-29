@@ -1,4 +1,5 @@
-from typing import Any, TypeVar
+import abc
+from typing import Any, Generic, Type, TypeVar
 
 from fastapi import Depends
 from pydantic import BaseModel
@@ -15,9 +16,19 @@ MODEL = TypeVar("Model", bound=Base)
 TABLE = TypeVar("Table", bound=Table)
 
 
-class SqlAlchemyRepo:
+class SqlAlchemyRepo(Generic[MODEL, TABLE], abc.ABC):
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self._session = session
+
+    @property
+    @abc.abstractmethod
+    def model(self) -> Type[MODEL] | TABLE:
+        ...
+
+    @property
+    @abc.abstractmethod
+    def column(self) -> Type[MODEL]:
+        ...
 
     @property
     def session(self) -> AsyncSession:
@@ -48,8 +59,8 @@ class SqlAlchemyRepo:
         result = await self.session.scalars(select(self.model).filter(*fs))
         return result.first()
 
-    async def count(self) -> int:
-        result = await self.session.scalars(count(self.model.id))
+    async def count(self, field="id") -> int:
+        result = await self.session.scalars(count(getattr(self.column, field)))
         return result.first()
 
     async def bulk_insert(self, insert_data: list[dict[str, Any]]) -> int:

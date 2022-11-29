@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
+from starlette import status
 
-from api.dependencies.users import get_active_user
+from api.dependencies.users import get_active_user, get_superuser
 from common import BadRequestException, NotFoundException
 from db.models import Category, User
 from db.repositories.categories import CategoriesRepository
@@ -39,3 +40,10 @@ async def category_detail(
     if category is None:
         raise NotFoundException(id=category_id)
     return category
+
+
+@router.delete("/{category_id}", summary="Удаление категории", status_code=status.HTTP_204_NO_CONTENT)
+async def category_delete(
+    category_id: int, cat_repo: CategoriesRepository = Depends(), user: User = Depends(get_superuser)
+):
+    await cat_repo.delete(id=category_id)

@@ -1,2 +1,3 @@
-from .base_repo import BaseRepository
+from .base_model_repo import BaseModelRepository
+from .base_table_repo import BaseTableRepository
 from .sqlalchemy_repo import SqlAlchemyRepo

@@ -1,10 +1,10 @@
 from typing import Type
 
 from db.models import Category
-from db.repositories.base import BaseRepository, SqlAlchemyRepo
+from db.repositories.base import BaseModelRepository
 
 
-class CategoriesRepository(SqlAlchemyRepo, BaseRepository):
+class CategoriesRepository(BaseModelRepository):
     @property
     def model(self) -> Type[Category]:
         return Category

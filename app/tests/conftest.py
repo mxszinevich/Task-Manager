@@ -15,7 +15,7 @@ from api.dependencies.users import get_active_user, get_user
 from config import settings
 from db.session import AsyncSessionBuilder
 
-pytest_plugins = ("tests.fixtures.users", "tests.fixtures.tasks")
+pytest_plugins = ("tests.fixtures.users", "tests.fixtures.tasks", "tests.fixtures.categories")
 
 faker = Faker(locale="ru_RU")
 
