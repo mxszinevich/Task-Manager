@@ -42,8 +42,8 @@ async def tasks_list(
 
 
 @router.get("/filters", summary="Фильтры задач", status_code=status.HTTP_200_OK)
-async def get_tasks_filters(user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()):
-    return await task_repo.get_filters()
+async def tasks_filters(user: User = Depends(get_active_user), task_repo: TasksRepository = Depends()):
+    return await task_repo.get_filters(user_id=user.id)
 
 
 @router.get("/{task_id}", summary="Детализация задачи", response_model=TaskDetail)

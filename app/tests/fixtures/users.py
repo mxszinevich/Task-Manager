@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Coroutine
 
 from pydantic import BaseModel, Field
 import pytest
@@ -27,7 +27,7 @@ def user_registration_data() -> Callable:
 
 
 @pytest.fixture()
-def user_factory(override_get_db_session) -> Callable:
+def user_factory(override_get_db_session) -> Coroutine:
     async def build_user(**kwargs) -> User:
         async for session in override_get_db_session():
             users_repo = UsersRepository(session=session)

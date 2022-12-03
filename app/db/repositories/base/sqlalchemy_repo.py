@@ -1,42 +1,26 @@
 import abc
 from typing import Any, Generic, Type, TypeVar
 
-from fastapi import Depends
 from pydantic import BaseModel
-from sqlalchemy import Table, delete, insert, update
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete, update
 from sqlalchemy.future import select
 from sqlalchemy.sql.elements import BinaryExpression
 from sqlalchemy.sql.functions import count
 
-from api.dependencies.db import get_db_session
 from db.models import Base
+from db.repositories.base import SessionRepository
+from db.repositories.utils import SqlHelperMixin
 
 MODEL = TypeVar("Model", bound=Base)
-TABLE = TypeVar("Table", bound=Table)
-
-DATA_TYPE = TypeVar("DataType", MODEL, TABLE)
 
 
-class SqlAlchemyRepo(Generic[DATA_TYPE], abc.ABC):
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
-        self._session = session
-
+class SqlAlchemyRepo(Generic[MODEL], SqlHelperMixin, SessionRepository, abc.ABC):
     @property
     @abc.abstractmethod
-    def model(self) -> Type[MODEL] | TABLE:
+    def model(self) -> Type[MODEL]:
         ...
 
-    @property
-    @abc.abstractmethod
-    def column(self) -> Type[MODEL]:
-        ...
-
-    @property
-    def session(self) -> AsyncSession:
-        return self._session
-
-    async def create(self, object_: BaseModel) -> MODEL | TABLE:
+    async def create(self, object_: BaseModel) -> MODEL:
         created_obj: MODEL = self.model(**object_.dict())
         self.session.add(created_obj)
         await self.session.flush()
@@ -51,7 +35,7 @@ class SqlAlchemyRepo(Generic[DATA_TYPE], abc.ABC):
         fs: list[BinaryExpression] = self.build_filters(params)
         await self.session.execute(delete(self.model).filter(*fs))
 
-    async def filters(self, limit: int | None = None, offset: int | None = None, **params) -> list[MODEL | TABLE]:
+    async def filters(self, limit: int | None = None, offset: int | None = None, **params) -> list[MODEL]:
         fs: list = self.build_filters(params)
         res = await self.session.scalars(select(self.model).filter(*fs).limit(limit).offset(offset))
         return res.all()
@@ -62,12 +46,5 @@ class SqlAlchemyRepo(Generic[DATA_TYPE], abc.ABC):
         return result.first()
 
     async def count(self, field="id") -> int:
-        result = await self.session.scalars(count(getattr(self.column, field)))
+        result = await self.session.scalars(count(getattr(self.model, field)))
         return result.first()
-
-    async def bulk_insert(self, insert_data: list[dict[str, Any]]) -> int:
-        result = await self.session.execute(insert(self.model).values(insert_data))
-        return result.rowcount
-
-    def build_filters(self, filter_params: dict[str, Any]) -> list[BinaryExpression]:
-        return [getattr(self.model, filter_name) == filter_value for filter_name, filter_value in filter_params.items()]

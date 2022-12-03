@@ -1,3 +1,4 @@
+from functools import partial
 import json
 
 from httpx import AsyncClient
@@ -239,3 +240,41 @@ class TestTasksRoutes:
             headers={"Authorization": f"{token_data.type} {token_data.access_token}"},
         )
         assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    async def test_tasks_filters(
+        self,
+        test_cred_client: AsyncClient,
+        task_factory,
+        user_active,
+        user_inactive,
+        category,
+        task_category_factory,
+        other_category,
+    ):
+        task_active_partial = partial(task_factory, user_id=user_active.id)
+        task_inactive_partial = partial(task_factory, user_id=user_inactive.id)
+        await task_inactive_partial(status=StatusType.COMPLETED)
+        task_in_actv = await task_inactive_partial(status=StatusType.ACTIVE)
+
+        task_cr1 = await task_active_partial(status=StatusType.CREATED)
+        await task_active_partial(status=StatusType.CREATED)
+        task_comp = await task_active_partial(status=StatusType.COMPLETED)
+        await task_active_partial(status=StatusType.EXPIRED)
+        await task_category_factory(task_id=task_cr1.id, category_id=category.id)
+        await task_category_factory(task_id=task_comp.id, category_id=category.id)
+        await task_category_factory(task_id=task_comp.id, category_id=other_category.id)
+        await task_category_factory(task_id=task_in_actv.id, category_id=other_category.id)
+        res = await test_cred_client.get("tasks/filters")
+        res_json = res.json()
+
+        assert len(res_json) == 2
+        status, categories = res_json
+        assert status["status"] == [
+            {"value": StatusType.CREATED.value, "label": StatusType.CREATED.display, "count": 2},
+            {"value": StatusType.COMPLETED.value, "label": StatusType.COMPLETED.display, "count": 1},
+            {"value": StatusType.EXPIRED.value, "label": StatusType.EXPIRED.display, "count": 1},
+        ]
+        assert categories["categories"] == [
+            {"value": category.id, "label": category.name, "count": 2},
+            {"value": other_category.id, "label": other_category.name, "count": 1},
+        ]

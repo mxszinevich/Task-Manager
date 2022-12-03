@@ -15,7 +15,12 @@ from api.dependencies.users import get_active_user, get_user
 from config import settings
 from db.session import AsyncSessionBuilder
 
-pytest_plugins = ("tests.fixtures.users", "tests.fixtures.tasks", "tests.fixtures.categories")
+pytest_plugins = (
+    "tests.fixtures.users",
+    "tests.fixtures.tasks",
+    "tests.fixtures.categories",
+    "tests.fixtures.tasks_categories",
+)
 
 faker = Faker(locale="ru_RU")
 
@@ -71,8 +76,11 @@ def test_session(test_postgres_dsn) -> AsyncSession:
 async def override_get_db_session(test_session) -> AsyncGenerator:
     async def get_db():
         async with test_session() as session:
-            yield session
-            await session.commit()
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
 
     return get_db
 
