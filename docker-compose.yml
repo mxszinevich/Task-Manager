@@ -1,0 +1,53 @@
+version: "3.8"
+
+x-services_envinronment: &env
+ environment:
+  - POSTGRES_USER
+  - POSTGRES_PASSWORD
+  - POSTGRES_DB
+  - POSTGRES_HOST
+  - SERVER_HOST
+  - SERVER_PORT
+  - APP_TOKEN_SECRET_KEY
+  - APP_DOCS_URL
+
+
+services:
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    <<: *env
+
+    healthcheck:
+      test: ["CMD", "psql", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      timeout: 45s
+      interval: 5s
+      retries: 15
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ./app
+      args:
+        POETRY_ARGS: --no-interaction --no-ansi
+    expose:
+      - 8000
+    depends_on:
+      db:
+        condition: service_healthy
+    <<: *env
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+      - app
+    restart: always
+
+volumes:
+  postgres_data:
