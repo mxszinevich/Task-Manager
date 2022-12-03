@@ -1,4 +1,4 @@
 #!/bin/bash
 
 alembic upgrade head
-python main.py
+gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${SERVER_PORT:-8000}
