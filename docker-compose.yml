@@ -44,6 +44,8 @@ services:
     build: ./nginx
     ports:
       - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
     depends_on:
       - db
       - app
