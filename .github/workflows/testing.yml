@@ -11,5 +11,5 @@ jobs:
         run: docker compose -f docker-compose.yml up -d --build
       - name: docker logs
         run: docker compose -f docker-compose.yml logs
-      - name: testing
+      - name: testing 🕵
         run: docker compose -f docker-compose.yml exec app pytest

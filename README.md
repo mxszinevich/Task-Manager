@@ -1,4 +1,5 @@
 [![linters](https://github.com/mxszinevich/Task-manager/actions/workflows/linters.yml/badge.svg?branch=master)](https://github.com/mxszinevich/Task-manager/actions/workflows/linters.yml)
+[![testing](https://github.com/mxszinevich/task-manager/actions/workflows/testing.yml/badge.svg)](https://github.com/mxszinevich/task-manager/actions/workflows/testing.yml)
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
