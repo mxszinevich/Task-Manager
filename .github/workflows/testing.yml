@@ -1,0 +1,15 @@
+name: testing
+on: [ push ]
+
+jobs:
+  linters:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout 🏁
+        uses: actions/checkout@v3
+      - name: docker build 🚢
+        run: docker compose -f docker-compose.yml up -d --build
+      - name: docker logs
+        run: docker compose -f docker-compose.yml logs
+      - name: testing
+        run: docker compose -f docker-compose.yml exec app pytest
