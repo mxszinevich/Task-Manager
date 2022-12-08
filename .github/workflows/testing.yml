@@ -2,7 +2,7 @@ name: testing
 on: [ push ]
 
 jobs:
-  linters:
+  testing:
     runs-on: ubuntu-latest
     steps:
       - name: checkout 🏁
