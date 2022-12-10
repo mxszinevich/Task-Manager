@@ -24,6 +24,7 @@ jobs:
         script: |
           cd ${{ secrets.PROJECT_PATH }}
           make down
+          export HTPASSWD=${{ secrets.HTPASSWD }}
           git pull origin master
           ls
           make build-prod

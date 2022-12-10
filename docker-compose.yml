@@ -49,6 +49,9 @@ services:
     depends_on:
       - db
       - app
+    environment:
+      - MODE=dev
+      - HTPASSWD
     restart: always
 
 volumes:
