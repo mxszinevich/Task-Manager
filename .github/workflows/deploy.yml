@@ -21,6 +21,8 @@ jobs:
         port: ${{ secrets.VPS_SSH_PORT }}
         script: |
           cd ${{ secrets.PROJECT_PATH }}
+          make down
           git pull origin master
           ls
           make build-prod
+          make list
