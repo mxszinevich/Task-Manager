@@ -1,5 +1,11 @@
 name: testing
-on: [ push ]
+on:
+  push:
+  workflow_run:
+    workflows: [linters]
+    types:
+      - completed
+    branches: [master]
 
 jobs:
   testing:
