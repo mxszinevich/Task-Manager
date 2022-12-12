@@ -24,9 +24,9 @@ jobs:
         script: |
           cd ${{ secrets.PROJECT_PATH }}
           make down
+          git pull
           export HTPASSWD=${{ secrets.HTPASSWD }}
           export ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
-          git pull origin master
           ls
           make build-prod
           make list
