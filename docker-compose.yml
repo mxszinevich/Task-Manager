@@ -51,6 +51,7 @@ services:
       - app
     environment:
       - MODE=dev
+      - ALLOWED_HOSTS=localhost
       - HTPASSWD
     restart: always
 
