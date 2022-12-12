@@ -24,7 +24,7 @@ jobs:
         script: |
           cd ${{ secrets.PROJECT_PATH }}
           make down
-          git pull
+          git pull origin master
           export HTPASSWD=${{ secrets.HTPASSWD }}
           export ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
           ls
