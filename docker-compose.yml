@@ -50,7 +50,6 @@ services:
       - db
       - app
     environment:
-      - MODE=dev
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost}
       - HTPASSWD
     restart: always

@@ -8,6 +8,10 @@ services:
         POETRY_ARGS: --only main --no-interaction --no-ansi
 
   nginx:
+    build:
+     context: ./nginx
+     args:
+       CONF_FILE: nginx.prod.conf
     volumes:
       - certs:/etc/ssl/certs
     ports:
