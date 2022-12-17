@@ -6,3 +6,12 @@ services:
       context: ./app
       args:
         POETRY_ARGS: --only main --no-interaction --no-ansi
+
+  nginx:
+    volumes:
+      - certs:/etc/ssl/certs
+    ports:
+      - "443:443"
+
+volumes:
+  certs:
