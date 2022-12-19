@@ -14,8 +14,10 @@ services:
        CONF_FILE: nginx.prod.conf
     volumes:
       - certs:/etc/ssl/certs
+      - app_static:/var/www/local_static/
     ports:
       - "443:443"
 
 volumes:
   certs:
+  app_static:
