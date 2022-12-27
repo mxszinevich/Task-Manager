@@ -65,6 +65,7 @@ services:
     build:
       context: ./app
     command: celery -A config worker -B --loglevel=info -c 2
+    <<: *env
     depends_on:
       - redis
       - app

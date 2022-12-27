@@ -9,6 +9,6 @@ app.conf.beat_schedule = {
     # tasks
     "task_status_update": {
         "task": "worker.task.task_update_status",
-        "schedule": crontab(minute="*/10"),
+        "schedule": crontab(minute="*/1"),
     },
 }

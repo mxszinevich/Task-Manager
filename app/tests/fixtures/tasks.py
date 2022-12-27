@@ -1,10 +1,11 @@
+from datetime import datetime
 from typing import Callable
 
 from pydantic import BaseModel, Field
 import pytest
 
 from db.constants import StatusType
-from db.models import Task
+from db.models import Task, User
 from db.repositories.tasks import TasksRepository
 from tests.conftest import faker
 
@@ -14,6 +15,7 @@ class TaskFactory(BaseModel):
     body: str = Field(default_factory=faker.paragraph)
     status: StatusType = Field(default=StatusType.CREATED)
     user_id: int = Field(...)
+    completion_date: datetime | None = Field(None)
 
 
 @pytest.fixture()
@@ -28,12 +30,12 @@ def task_factory(override_get_db_session) -> Callable:
 
 
 @pytest.fixture
-async def task(task_factory, user_active) -> Task:
+async def task(task_factory: Callable, user_active: User) -> Task:
     yield await task_factory(user_id=user_active.id)
 
 
 @pytest.fixture
-async def tasks_generating(task_factory, user_active) -> Callable:
+async def tasks_generating(task_factory: Callable, user_active: User) -> Callable:
     async def _build(n: int, **kwargs) -> list[Task]:
         tasks = [(await task_factory(user_id=user_active.id, **kwargs)) for _ in range(n)]
         return tasks

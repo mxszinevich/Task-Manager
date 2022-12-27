@@ -9,7 +9,7 @@ class AsyncSessionBuilder:
         self.database_url = database_url
         self.engine = create_async_engine(database_url, echo=echo)
 
-    def __call__(self, *args, **kwargs) -> AsyncSession:
+    def __call__(self, *args, **kwargs) -> sessionmaker:
         self.session = sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
         return self.session
 

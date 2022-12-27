@@ -1,6 +1,8 @@
 from asyncio import gather
+from datetime import datetime
 from typing import Type
 
+from sqlalchemy import and_, update
 from sqlalchemy.future import select
 from sqlalchemy.orm import InstrumentedAttribute, selectinload
 from sqlalchemy.sql import Selectable
@@ -8,6 +10,7 @@ from sqlalchemy.sql.elements import BinaryExpression
 from sqlalchemy.sql.functions import count
 
 from common.aggregate import BaseAggregate, BaseFilterAggregate
+from db.constants import StatusType
 from db.models import Category, Task, TaskCategory
 from db.repositories.base import SqlAlchemyRepo
 
@@ -58,3 +61,17 @@ class TasksRepository(SqlAlchemyRepo[Task]):
         fs: list[BinaryExpression] = self.build_filters(params)
         result = await self.session.execute(select(self.model).where(*fs).options(selectinload(self.model.categories)))
         return result.scalars().first()
+
+    async def tasks_changing_status(self):
+        await self.session.execute(
+            update(Task)
+            .where(
+                and_(
+                    datetime.today() > Task.completion_date,
+                    Task.status.not_in([StatusType.COMPLETED, StatusType.EXPIRED]),
+                    Task.completion_date.is_not(None),
+                )
+            )
+            .values(status=StatusType.EXPIRED)
+        )
+        await self.session.commit()
