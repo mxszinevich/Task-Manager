@@ -54,5 +54,33 @@ services:
       - HTPASSWD
     restart: always
 
+  redis:
+    image: redis:7.0.7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/app/redisdata
+
+  celery:
+    build:
+      context: ./app
+    command: celery -A config worker -B --loglevel=info -c 2
+    depends_on:
+      - redis
+      - app
+
+  flower:
+    image: mher/flower
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_URL_PREFIX=flower
+    depends_on:
+      - celery
+
+
 volumes:
   postgres_data:
+  redisdata:

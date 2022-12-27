@@ -15,5 +15,4 @@ COPY poetry.lock pyproject.toml /app/
 ARG POETRY_ARGS="--only main --no-interaction --no-ansi"
 RUN pip install poetry && poetry install $POETRY_ARGS
 COPY . /app/
-RUN chmod +x start.*
-CMD ["./start.sh"]
+RUN chmod +x start.sh

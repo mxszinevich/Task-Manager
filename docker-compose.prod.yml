@@ -18,6 +18,10 @@ services:
     ports:
       - "443:443"
 
+  flower:
+    environment:
+      - FLOWER_BASIC_AUTH
+
 volumes:
   certs:
   app_static:

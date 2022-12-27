@@ -27,6 +27,7 @@ jobs:
           git pull origin master
           export HTPASSWD=${{ secrets.HTPASSWD }}
           export ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          export FLOWER_BASIC_AUTH=${{secrets.FLOWER_BASIC_AUTH}}
           ls
           make build-prod
           make list
